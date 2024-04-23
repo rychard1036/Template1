@@ -1,4 +1,7 @@
 # Import necessary modules
+from kivy import utils
+from kivy.core.window import Window
+from kivy.properties import StringProperty
 from kivymd.app import MDApp
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy_garden.mapview import MapMarkerPopup, MapView
@@ -8,22 +11,42 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.clock import Clock
 from plyer import gps
 
+if utils.platform != 'android':
+    Window.size = (412, 732)
+
 
 # Define the main app class
-class MyApp(MDApp):
+class MainApp(MDApp):
+    latitude = StringProperty("37.7749")
+    longitude = StringProperty("122.4194")
+
+    def on_start(self):
+        if utils.platform == 'android':
+            self.request_android_permissions()
+
+    def locate_current_location(self):
+        gps.configure(on_location=self.on_location)
+        gps.start(minTime=1000, minDistance=0)
+
+    def on_location(self, **kwargs):
+        self.latitude = str(kwargs['lat'])
+        self.longitude = str(kwargs['lon'])
+
+    def request_android_permissions(self):
+        from android.permissions import request_permissions, Permission
+
+        def callback(permissions, results):
+            if all([res for res in results]):
+                print("callback. All permissions granted.")
+            else:
+                print("callback. Some permissions refused.")
+
+        request_permissions([Permission.ACCESS_COARSE_LOCATION,
+                             Permission.ACCESS_FINE_LOCATION, Permission.CALL_PHONE], callback)
+
     def build(self):
         # Create the screen manager
-        self.sm = ScreenManager()
-
-        # Create the screens
-        login_screen = LoginScreen(name='login')
-        map_screen = MapScreen(name='map')
-
-        # Add screens to the screen manager
-        self.sm.add_widget(login_screen)
-        self.sm.add_widget(map_screen)
-
-        return self.sm
+        pass
 
 
 # Define the login screen class
@@ -42,6 +65,9 @@ class LoginScreen(Screen):
 
 # Define the map screen class
 class MapScreen(Screen):
+    latitude = StringProperty("37.7749")
+    longitude = StringProperty("122.4194")
+
     def __init__(self, **kwargs):
         super(MapScreen, self).__init__(**kwargs)
 
@@ -79,11 +105,11 @@ class MapScreen(Screen):
         gps.start(minTime=1000, minDistance=0)
 
     def on_location(self, **kwargs):
-        latitude = kwargs['lat']
-        longitude = kwargs['lon']
-        self.map_view.center_on(latitude, longitude)
+        self.latitude = str(kwargs['lat'])
+        self.longitude = str(kwargs['lon'])
+        self.map_view.center_on(self.latitude, self.longitude)
 
 
 # Run the app
 if __name__ == '__main__':
-    MyApp().run()
+    MainApp().run()

@@ -1,0 +1,32 @@
+#:import sm kivy.uix.screenmanager
+#:import orientation plyer.orientation
+ScreenManager:
+    id:manager
+    transition:sm.FadeTransition(duration=.0)
+    MDScreen:
+        name:'home'
+        MDTopAppBar:
+            title: "Home"
+            elevation:2
+            pos_hint: {"top": 1}
+            md_bg_color: 214/255, 223/255, 232/255, 1
+            specific_text_color: "#4a4939"
+        FloatLayout:
+            MDRaisedButton:
+                text:"Login"
+                pos_hint:{"center_x":.5, "center_y":.5}
+                on_release:
+                    manager.current='map'
+    MDScreen:
+        name:'map'
+        FloatLayout:
+            MapView:
+                id:mapp
+                zoom:12
+                lat:app.latitude
+                lon:app.longitude
+                size_hint:1,1
+            MDIconButton:
+                icon:"crosshairs-gps"
+                on_release:
+                    app.locate_current_location()
