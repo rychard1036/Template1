@@ -14,9 +14,15 @@ from plyer import gps
 if utils.platform != 'android':
     Window.size = (412, 732)
 
+class RowCard(MDCard):
+    icon = StringProperty("")
+    name = StringProperty("")
+
 
 # Define the main app class
 class MainApp(MDApp):
+    size_x, size_y = Window.size
+
     latitude = StringProperty("37.7749")
     longitude = StringProperty("122.4194")
 
@@ -46,7 +52,7 @@ class MainApp(MDApp):
 
     def build(self):
         # Create the screen manager
-        pass
+        self.theme_cls.material_style = "M3"
 
 
 # Define the login screen class
