@@ -1,0 +1,92 @@
+#:import sm kivy.uix.screenmanager
+#:import orientation plyer.orientation
+<MDScreenManager>:
+    id:manager
+    transition:sm.FadeTransition(duration=.0)
+    HomeScreen:
+        name: 'home'
+    MapScreen:
+        name: 'map'
+
+<HomeScreen>:
+    name:'home'
+    MDTopAppBar:
+        title: "Home"
+        elevation:2
+        pos_hint: {"top": 1}
+        md_bg_color: 214/255, 223/255, 232/255, 1
+        specific_text_color: "#4a4939"
+    FloatLayout:
+        MDRaisedButton:
+            text:"Login"
+            pos_hint:{"center_x":.5, "center_y":.5}
+            on_release:
+                root.manager.current='map'
+
+<MapScreen>:
+    name:'map'
+    FloatLayout:
+        MapView:
+            id:mapp
+            zoom:6
+            lat:app.latitude
+            lon:app.longitude
+            size_hint:1,1
+        MDFloatingActionButton:
+            md_bg_color:"white"
+            icon: "menu"
+            text_color: "black"
+            pos_hint:{"center_x":.15, "center_y":.93}
+        MDFloatingActionButton:
+            md_bg_color:"white"
+            icon: "crosshairs-gps"
+            text_color: "black"
+            pos_hint:{"center_x":.7, "center_y":.4}
+            on_release:
+                app.locate_current_location()
+        MDFloatingActionButton:
+            md_bg_color:"white"
+            icon: "arrow-left"
+            text_color: "black"
+            pos_hint:{"center_x":.3, "center_y":.4}
+        RowCard:
+            pos_hint:{"center_x":.5, "center_y":.2}
+
+<RowCard>:
+    #orientation: "vertical"
+    md_bg_color: 1, 1, 1, 1
+    pos_hint:{"center_x":.5,"center_y":.3}
+    padding: "10dp"
+    spacing: "5dp"
+    border_radius: 15
+    border_color_a: .5
+    border_color_a: 1
+    adaptive_height:True
+    radius: [10]
+    size_hint: 0.6, 0.2
+    size: app.size_x/1.5, app.size_y/4
+    focus_behavior: False
+    ripple_color:.9, .9, .95, 1
+    ripple_behavior: True
+    on_release:
+        print("mama")
+    FloatLayout:
+        MDLabel:
+            text:"255 Main Street"
+            font_size:"10sp"
+            halign:"center"
+            font_style:"Caption"
+            color:"grey"
+            pos_hint:{"center_x":.2,"center_y":.7}
+        MDLabel:
+            text:"Pickup Spots"
+            font_size:"19sp"
+            halign:"center"
+            bold:True
+            pos_hint:{"center_x":.24,"center_y":.84}
+        MDFillRoundFlatIconButton:
+            md_bg_color:"orange"
+            text: "7"
+            icon: "currency-usd"
+            text_color: "white"
+            pos_hint:{"center_x":.8,"center_y":.84}
