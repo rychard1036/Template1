@@ -10,8 +10,9 @@ from kivymd.uix.card import MDCard
 from kivymd.uix.label import MDLabel
 from kivymd.uix.button import MDRaisedButton, MDIconButton, MDFillRoundFlatIconButton
 from kivy.uix.floatlayout import FloatLayout
-from kivy.clock import Clock
+from kivy.clock import Clock, mainthread
 from plyer import gps
+from plyer.utils import platform
 
 from markers import markers
 
@@ -30,9 +31,12 @@ class MainApp(MDApp):
     latitude = StringProperty("-5.767057")
     longitude = StringProperty("34.723747")
 
+    gps_location = StringProperty("")
+    gps_status = StringProperty("")
+
     def on_start(self):
         if utils.platform == 'android':
-            self.request_android_permissions()
+            self.gps_init()
 
     def locate_current_location(self):
         gps.configure(on_location=self.on_location)
@@ -41,6 +45,46 @@ class MainApp(MDApp):
     def on_location(self, **kwargs):
         self.latitude = str(kwargs['lat'])
         self.longitude = str(kwargs['lon'])
+        print(self.longitude, self.latitude)
+
+    @mainthread
+    def gps_init(self):
+        try:
+            gps.configure(on_location=self.on_location,
+                          on_status=self.on_status)
+
+        except NotImplementedError:
+            import traceback
+            traceback.print_exc()
+            gps_status = 'GPS is not implemented for your platform'
+
+            return gps_status
+
+        if platform == "android":
+            print("gps.py: Android detected. Requesting permissions")
+            self.request_android_permissions()
+
+    @mainthread
+    def start(self, minTime=1000, minDistance=10):
+        gps.start(minTime, minDistance)
+
+    @mainthread
+    def stop(self):
+        gps.stop()
+
+    @mainthread
+    def on_location(self, **kwargs):
+        map = self.root.ids.mapp
+        self.gps_location = '\n'.join([
+            '{}={}'.format(k, v) for k, v in kwargs.items()])
+
+        map.center_on(float(kwargs["lat"]), float(kwargs["lon"]))
+        self.latitude = str(float(kwargs["lat"]))
+        self.longitude = str(float(kwargs["lon"]))
+
+    @mainthread
+    def on_status(self, stype, status):
+        self.gps_status = 'type={}\n{}'.format(stype, status)
 
     def request_android_permissions(self):
         from android.permissions import request_permissions, Permission
@@ -60,18 +104,8 @@ class MainApp(MDApp):
 
 
 class MapScreen(MDScreen):
-    def on_enter(self, *args):
-        map_source = MapSource(url="https://a.tile.openstreetmap.org/{z}/{x}/{y}.png")
-        self.ids.mapp.map_source = map_source
+    pass
 
-        for location_data in markers:
-            lat = location_data["lat"]
-            lon = location_data["lon"]
-            text = location_data["text"]
-
-            popup = MapMarkerPopup(lat=lat, lon=lon, size_hint=(None, None), size=(30, 30))
-            popup.add_widget(MDLabel(text=text))
-            self.ids.mapp.add_marker(popup)
 
 
 class HomeScreen(MDScreen):
