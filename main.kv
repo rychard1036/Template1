@@ -13,11 +13,35 @@
             md_bg_color: 214/255, 223/255, 232/255, 1
             specific_text_color: "#4a4939"
         FloatLayout:
+            MDTextField:
+                id: email_field
+                hint_text: "Email"
+                pos_hint: {'center_x': 0.5, 'center_y': 0.7}
+                size_hint_x: None
+                width: 300
+            MDTextField:
+                id: password_field
+                hint_text: "Password"
+                pos_hint: {'center_x': 0.5, 'center_y': 0.6}
+                size_hint_x: None
+                width: 300
+                password: True
+        FloatLayout:
+            orientation: "horizontal"
             MDRaisedButton:
-                text:"Login"
-                pos_hint:{"center_x":.5, "center_y":.5}
+                md_bg_color: 1, 1, 1, 1
+                text: "Create User"
+                text_color: app.theme_cls.primary_color
+                elevation_normal: 1
+                pos_hint: {'center_x': 0.3, 'center_y': 0.5}
                 on_release:
-                    manager.current='map'
+                    app.create_user()
+            MDRaisedButton:
+                text: "Login"
+                pos_hint: {'center_x': 0.7, 'center_y': 0.5}
+                on_release:
+                    app.authenticate_user()
+
 
     MDScreen:
         name:'map'
